@@ -70,7 +70,7 @@ end, end
 Requirements: Python 3.10 or newer (only needed to run from source).
 
 ```bash
-git clone https://github.com/<your-username>/tiny-scanner.git
+git clone https://github.com/mhvmdd/tiny-scanner.git
 cd tiny-scanner
 python main.py path/to/sample.tiny
 ```
@@ -122,8 +122,6 @@ The scanner is a deterministic finite automaton (DFA) with these states: `START`
 | Member 4 | Error handling, comments and whitespace (`errors.py`) |
 | Member 5 | Input/output and screenshots (`input_reader.py`, `output_writer.py`) |
 | Member 6 | Testing, documentation and review (`run_tests.py`, `test_samples/`, `docs/`) |
-
-Replace "Member N" with your names and GitHub usernames.
 
 ## Deliverables
 
