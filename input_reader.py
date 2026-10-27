@@ -7,7 +7,6 @@ class InputReader:
 
         self.position = 0
         self.line_number = 1
-        self.last_char = None
         self.previous_line = 1
         self.can_unget = False
 
@@ -25,7 +24,6 @@ class InputReader:
         if char == "\n":
             self.line_number += 1
 
-        self.last_char = char
         self.can_unget = True
 
         return char
