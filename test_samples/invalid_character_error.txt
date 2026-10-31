@@ -1,0 +1,5 @@
+# The scanner must report the bad character on line 2 without crashing.
+# Matching is case-insensitive and each non-comment line is a fragment that
+# must appear somewhere in stdout, stderr, or tokens_output.txt.
+line 2
+@
