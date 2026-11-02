@@ -4,6 +4,11 @@ from tkinter import filedialog, messagebox
 from scanner import Scanner
 from input_reader import InputReader
 from output_writer import write_tokens
+from errors import (
+    ScannerError,
+    check_source,
+    scan_text,
+)
 
 
 class TinyScannerUI:
@@ -12,7 +17,6 @@ class TinyScannerUI:
         self.root.title("Tiny Scanner")
         self.root.geometry("700x550")
 
-        # toolbar
         top = tk.Frame(root)
         top.pack(fill=tk.X)
 
@@ -21,12 +25,10 @@ class TinyScannerUI:
         tk.Button(top, text="Clear", command=self.clear).pack(side=tk.LEFT, padx=2, pady=2)
         tk.Button(top, text="Save Tokens", command=self.save_tokens).pack(side=tk.LEFT, padx=2, pady=2)
 
-        # input
         tk.Label(root, text="Source Code:").pack(anchor=tk.W, padx=5)
         self.code = tk.Text(root, height=18)
         self.code.pack(fill=tk.BOTH, expand=True, padx=5)
 
-        # output
         tk.Label(root, text="Tokens:").pack(anchor=tk.W, padx=5)
         self.tokens = tk.Text(root, height=12)
         self.tokens.pack(fill=tk.BOTH, expand=True, padx=5)
@@ -44,98 +46,58 @@ class TinyScannerUI:
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
+    def show_error(self, err, tokens):
+        """Show valid tokens, then the error, and save everything to the output file."""
+        msg = str(err)
+        self.tokens_list = tokens
+        for t in tokens:
+            self.tokens.insert(tk.END, f"{t.value}, {t.type.name}\n")
+        self.tokens.insert(tk.END, msg + "\n")
+        write_tokens(tokens, "tokens_output.txt", error=msg)
+        messagebox.showerror("Error", msg)
+
     def scan_code(self):
         self.tokens.delete("1.0", tk.END)
         self.tokens_list = []
-        text = self.code.get("1.0", tk.END)
+        # Always read the CURRENT contents of the editor.
+        text = self.code.get("1.0", "end-1c")
 
-        # save temp file
         try:
-            with open("temp_input.tiny", "w", encoding="utf-8") as f:
+            with open("temp_input.tiny", "w", encoding="utf-8", newline="") as f:
                 f.write(text)
         except Exception as e:
             messagebox.showerror("Error", str(e))
             return
 
-        # check for errors first
-        i = 0
-        line = 1
-        col = 1
-        n = len(text)
-        while i < n:
-            ch = text[i]
-            if ch == '\n':
-                line += 1
-                col = 1
-                i += 1
-                continue
-            if ch == '\r':
-                if i + 1 < n and text[i + 1] == '\n':
-                    i += 1
-                line += 1
-                col = 1
-                i += 1
-                continue
-            if ch.isspace():
-                col += 1
-                i += 1
-                continue
-            if ch == '{':
-                i += 1
-                col += 1
-                while i < n and text[i] != '}':
-                    if text[i] == '\n':
-                        line += 1
-                        col = 1
-                    elif text[i] == '\r':
-                        if i + 1 < n and text[i + 1] == '\n':
-                            i += 1
-                        line += 1
-                        col = 1
-                    else:
-                        col += 1
-                    i += 1
-                if i < n and text[i] == '}':
-                    i += 1
-                    col += 1
-                continue
-            if ch.isalpha():
-                while i < n and text[i].isalpha():
-                    i += 1
-                    col += 1
-                continue
-            if ch.isdigit():
-                while i < n and text[i].isdigit():
-                    i += 1
-                    col += 1
-                continue
-            if ch == ':' and i + 1 < n and text[i + 1] == '=':
-                i += 2
-                col += 2
-                continue
-            if ch in ';<>=+-*/()':
-                i += 1
-                col += 1
-                continue
-            msg = f"Lexical error at line {line}, column {col}: invalid character {ch!r}"
-            self.tokens.insert(tk.END, msg + "\n")
-            messagebox.showerror("Error", msg)
-            try:
-                write_tokens([], "tokens_output.txt", error=msg)
-            except:
-                pass
+        # One pass over the whole source: invalid characters, capitalised
+        # reserved words and unterminated comments are all detected here.
+        found = check_source(text, "temp_input.tiny")
+        if found is not None:
+            err, pos = found
+            self.show_error(err, scan_text(text[:pos]))
             return
 
         try:
             reader = InputReader("temp_input.tiny")
             scanner = Scanner(reader)
+            err = None
             while True:
-                token = scanner.get_token()
+                try:
+                    token = scanner.get_token()
+                except ScannerError as e:
+                    err = e
+                    break
+                except Exception as e:
+                    err = e
+                    break
                 if token is None:
                     break
                 self.tokens_list.append(token)
                 self.tokens.insert(tk.END, f"{token.value}, {token.type.name}\n")
-            write_tokens(self.tokens_list, "tokens_output.txt")
+            if err is None:
+                write_tokens(self.tokens_list, "tokens_output.txt")
+            else:
+                self.show_error(err, self.tokens_list)
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
