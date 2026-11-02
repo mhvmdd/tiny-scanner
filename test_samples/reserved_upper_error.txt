@@ -1,1 +1,5 @@
-ERROR at line 2: Invalid identifier
+read, READ
+x, IDENTIFIER
+;, SEMICOLON
+if, IF
+ERROR at line 2: Invalid character 'READ'
