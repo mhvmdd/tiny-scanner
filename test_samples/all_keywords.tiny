@@ -1,0 +1,8 @@
+read x;
+write y;
+if x = 1 then
+  y := x
+end;
+repeat
+  x := x + 1
+until x
