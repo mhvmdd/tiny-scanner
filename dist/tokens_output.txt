@@ -1,1 +1,7 @@
-Lexical error at line 2, column 7: invalid character '@'
+read, READ
+x, IDENTIFIER
+;, SEMICOLON
+write, WRITE
+x, IDENTIFIER
+;, SEMICOLON
+ERROR at line 7: Unterminated comment: missing '}'
