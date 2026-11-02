@@ -1,0 +1,7 @@
+x, IDENTIFIER
+:=, ASSIGN
+10, NUMBER
+;, SEMICOLON
+write, WRITE
+y, IDENTIFIER
+ERROR at line 2: Invalid character '@'
