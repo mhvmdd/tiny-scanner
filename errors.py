@@ -119,7 +119,7 @@ skip_whitespace_and_comment = skip_whitespace_and_comments
 # Shared source checking (used by both main.py and ui.py)
 # ---------------------------------------------------------------------------
 
-_INVALID_CHARS = set("@$#!%")  # same set the original main.py/ui.py flagged
+_VALID_SYMBOLS = set(":=+-*/<();")
 
 
 def check_source(text, filename=None):
@@ -171,7 +171,7 @@ def check_source(text, filename=None):
                 continue
             return InvalidCharError(ch, line, col, filename), i
 
-        if ch in _INVALID_CHARS:
+        if ch not in _VALID_SYMBOLS:
             return InvalidCharError(ch, line, col, filename), i
 
         i += 1
