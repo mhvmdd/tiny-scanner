@@ -9,7 +9,7 @@ class Scanner:
     @staticmethod
     def _make_word(lexeme):
         """Keyword (if, then, ...) or plain identifier."""
-        return Token(RESERVED_WORDS.get(lexeme, TokenType.IDENTIFIER), lexeme)
+        return Token(RESERVED_WORDS.get(lexeme.lower(), TokenType.IDENTIFIER), lexeme)
 
     def get_token(self):
         """Return the next Token, or None at the end of the input."""

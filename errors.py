@@ -110,7 +110,6 @@ skip_whitespace_and_comment = skip_whitespace_and_comments
 # ---------------------------------------------------------------------------
 
 _VALID_SYMBOLS = set(":=+-*/<();")
-_RESERVED_UPPER = {"IF", "THEN", "ELSE", "END", "REPEAT", "UNTIL", "READ", "WRITE"}
 
 
 def check_source(text, filename=None):
@@ -142,9 +141,6 @@ def check_source(text, filename=None):
             j = i
             while j < n and (text[j].isalnum() or text[j] == '_'):
                 j += 1
-            word = text[i:j]
-            if word in _RESERVED_UPPER:
-                return InvalidCharacterError(word, line, col, filename), i
             col += j - i
             i = j
             continue
