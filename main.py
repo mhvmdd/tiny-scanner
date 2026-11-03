@@ -6,6 +6,7 @@ from errors import (
     ScannerError,
     check_source,
     scan_text,
+    fix_case,
 )
 
 
@@ -57,6 +58,7 @@ def main():
         if token is None:
             break
         tokens.append(token)
+    fix_case(tokens)
 
     if err is None:
         write_tokens(tokens, "tokens_output.txt")

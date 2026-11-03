@@ -8,6 +8,7 @@ from errors import (
     ScannerError,
     check_source,
     scan_text,
+    fix_case,
 )
 
 
@@ -92,6 +93,7 @@ class TinyScannerUI:
                     break
                 if token is None:
                     break
+                fix_case([token])
                 self.tokens_list.append(token)
                 self.tokens.insert(tk.END, f"{token.value}, {token.type.name}\n")
             if err is None:

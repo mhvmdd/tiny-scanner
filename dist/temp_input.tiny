@@ -1,0 +1,4 @@
+reAD x;
+iF x < 10 tHEn
+  x := x + 4
+eND
