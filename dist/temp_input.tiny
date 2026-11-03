@@ -1,7 +1,0 @@
-{ leading comment }
-read x; { inline comment }
-{
-  multi-line comment
-  with symbols that are not tokens: @ # $ % 123
-}
-write x; { trailing comment 
