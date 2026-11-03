@@ -119,7 +119,7 @@ skip_whitespace_and_comment = skip_whitespace_and_comments
 # Shared source checking (used by both main.py and ui.py)
 # ---------------------------------------------------------------------------
 
-_VALID_SYMBOLS = set(":=+-*/<();")
+_INVALID_CHARS = set("@$#!%")  # same set the original main.py/ui.py flagged
 
 
 def check_source(text, filename=None):
@@ -171,11 +171,27 @@ def check_source(text, filename=None):
                 continue
             return InvalidCharError(ch, line, col, filename), i
 
-        if ch not in _VALID_SYMBOLS:
+        if ch in _INVALID_CHARS:
             return InvalidCharError(ch, line, col, filename), i
 
         i += 1
         col += 1
+
+
+def fix_case(tokens):
+    """TINY is case-insensitive: READ, Read and read are all the READ keyword.
+
+    The scanner only knows lower-case keywords, so any IDENTIFIER whose
+    lower-cased text is a reserved word is turned into that keyword here.
+    The text is kept exactly as the user typed it.
+    """
+    from tokens import RESERVED_WORDS, TokenType
+    for t in tokens:
+        if t.type == TokenType.IDENTIFIER:
+            kw = RESERVED_WORDS.get(str(t.value).lower())
+            if kw is not None:
+                t.type = kw
+    return tokens
 
 
 def scan_text(text):
@@ -205,7 +221,7 @@ def scan_text(text):
             if token is None:
                 break
             tokens.append(token)
-        return tokens
+        return fix_case(tokens)
     finally:
         try:
             os.remove(path)
