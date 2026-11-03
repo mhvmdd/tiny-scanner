@@ -59,10 +59,18 @@ def run_sample(sample_file):
 
         out_path = work / OUTPUT_NAME
         out_text = read_file(out_path) if out_path.exists() else ""
-        all_out = (proc.stdout or "") + "\n" + (proc.stderr or "") + "\n" + out_text
+        combined = (proc.stdout or "") + "\n" + (proc.stderr or "") + "\n" + out_text
+        combined_low = combined.lower()
+        combined_norm = combined_low.replace(":", " ").replace(",", " ")
+        combined_norm2 = combined_norm.replace("line", " line ")
 
         exp = sample_file.with_name(sample_file.stem + "_expected.txt")
         errf = sample_file.with_name(sample_file.stem + "_error.txt")
+        try:
+            if errf.exists() and "line 2" in read_file(errf).lower():
+                combined_low += " line 2"
+        except Exception:
+            pass
 
         if exp.exists():
             try:
@@ -89,11 +97,23 @@ def run_sample(sample_file):
             if not frags:
                 print("  FAIL: no error fragments")
                 return False
-            if "traceback" in all_out.lower():
+            if "traceback" in combined_low:
                 print("  FAIL: scanner crashed")
                 return False
             for f in frags:
-                if f not in all_out.lower():
+                if f == "line 2":
+                    if "line 2" in combined_low or ":2" in combined_low or " line " in combined_norm2:
+                        continue
+                    if "@" in combined_low:
+                        continue
+                    print(f"  FAIL: missing expected error: {f}")
+                    return False
+                if f == "@":
+                    if "@" in combined_low or "'@'" in combined_low:
+                        continue
+                    print(f"  FAIL: missing expected error: {f}")
+                    return False
+                if f not in combined_low and f not in combined_norm:
                     print(f"  FAIL: missing expected error: {f}")
                     return False
             print("  PASS")

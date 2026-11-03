@@ -1,0 +1,5 @@
+read, READ
+x, IDENTIFIER
+;, SEMICOLON
+if, IF
+ERROR at line 2: Invalid character 'READ'
