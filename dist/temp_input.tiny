@@ -1,4 +1,7 @@
-reAD x;
-iF x < 10 tHEn
-  x := x + 4
-eND
+{ leading comment }
+read x; { inline comment }
+{
+  multi-line comment
+  with symbols that are not tokens: @ # $ % 123
+
+write x; { trailing comment }

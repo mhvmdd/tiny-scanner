@@ -4,6 +4,15 @@ from input_reader import InputReader
 from output_writer import write_tokens
 from errors import (
     ScannerError,
+    InvalidCharError,
+    InvalidIdentifierError,
+    UnterminatedComment,
+    InvalidCharacterError,
+    UnterminatedCommentError,
+    skip_whitespace_and_comments,
+    skip_ignored,
+    skipWhitespaceAndComments,
+    skip_whitespace_and_comment,
     check_source,
     scan_text,
     fix_case,

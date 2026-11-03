@@ -1,14 +1,4 @@
-reAD, READ
+read, READ
 x, IDENTIFIER
 ;, SEMICOLON
-iF, IF
-x, IDENTIFIER
-<, LESSTHAN
-10, NUMBER
-tHEn, THEN
-x, IDENTIFIER
-:=, ASSIGN
-x, IDENTIFIER
-+, PLUS
-4, NUMBER
-eND, END
+ERROR at line 7: Nested comment: '{' inside a comment that is not closed yet
