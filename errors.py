@@ -29,6 +29,17 @@ class UnterminatedComment(ScannerError):
         super().__init__(f"Unterminated comment: missing {COMMENT_END!r}", line, col, filename)
 
 
+class NestedComment(ScannerError):
+    def __init__(self, line=1, col=1, filename=None):
+        super().__init__("Nested comment: '{' inside a comment that is not closed yet", line, col, filename)
+
+
+class InvalidIdentifierError(ScannerError):
+    """A reserved word written in capitals, e.g. READ instead of read."""
+    def __init__(self, word, line=1, col=1, filename=None):
+        super().__init__(f"Invalid identifier {word!r}", line, col, filename)
+
+
 # keep old names too
 InvalidCharacterError = InvalidCharError
 UnterminatedCommentError = UnterminatedComment
@@ -66,10 +77,9 @@ def skip_whitespace_and_comments(text, i=0, line=1, col=1, filename=None):
             i += 1
             col += 1
             while i < n and text[i] != COMMENT_END:
-                # A '{' inside a comment means the first '{' was never closed
-                # (comments do not nest), so report that first '{'.
+                # A '{' while a comment is still open is a nested comment.
                 if text[i] == COMMENT_START:
-                    err = UnterminatedComment(start_line, start_col, filename)
+                    err = NestedComment(line, col, filename)
                     err.pos = start_i
                     raise err
                 if text[i] == '\n':
@@ -129,8 +139,8 @@ def check_source(text, filename=None):
     while True:
         try:
             i, line, col = skip_ignored(text, i, line, col, filename)
-        except UnterminatedCommentError as e:
-            # e.pos is the index of the '{' that never closes.
+        except (UnterminatedCommentError, NestedComment) as e:
+            # e.pos is the index of the '{' that starts the bad comment.
             return e, getattr(e, "pos", 0)
 
         if i >= n:
@@ -156,6 +166,14 @@ def check_source(text, filename=None):
             col += j - i
             i = j
             continue
+
+        # ':' is only valid as part of ':='
+        if ch == ':':
+            if i + 1 < n and text[i + 1] == '=':
+                i += 2
+                col += 2
+                continue
+            return InvalidCharError(ch, line, col, filename), i
 
         if ch not in _VALID_SYMBOLS:
             return InvalidCharError(ch, line, col, filename), i
